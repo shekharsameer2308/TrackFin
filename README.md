@@ -135,9 +135,12 @@ TrackFin is licensed under the **Apache License 2.0**. See the [LICENSE](LICENSE
 
 ---
 
-Author
+## **Author**
 
-Crafted with care by Sameer ShekharLinkedIn: linkedin.com/in/shekharsameer2308GitHub: github.com/shekharsameer2308
+Crafted with care by **Sameer Shekhar**  
+**LinkedIn:** [linkedin.com/in/shekharsameer2308](https://www.linkedin.com/in/shekharsameer2308)  
+**GitHub:** [github.com/shekharsameer2308](https://github.com/shekharsameer2308)
+
 ---
 
 ## **Tagline**
