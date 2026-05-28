@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('goal-form').addEventListener('submit', handleAddGoal);
     document.getElementById('auth-form').addEventListener('submit', handleAuthSubmit);
     document.getElementById('toggle-auth-mode').addEventListener('click', toggleAuthMode);
+    document.getElementById('guest-btn').addEventListener('click', handleGuestLogin);
     
     checkAuthStatus();
 });
@@ -52,6 +53,27 @@ async function handleAuthSubmit(e) {
         }
     } catch (error) {
         console.error("Auth error:", error);
+        alert("Failed to connect to server.");
+    }
+}
+
+async function handleGuestLogin(e) {
+    e.preventDefault();
+    try {
+        const response = await fetch(`${API_URL}/auth/guest`, {
+            method: 'POST'
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+            localStorage.setItem('token', data.token);
+            document.getElementById('auth-modal').classList.remove('active');
+            fetchDashboardData();
+        } else {
+            alert('Guest login failed');
+        }
+    } catch (error) {
+        console.error("Guest Auth error:", error);
         alert("Failed to connect to server.");
     }
 }

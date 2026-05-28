@@ -38,3 +38,22 @@ def login():
     }, current_app.config['SECRET_KEY'], algorithm="HS256")
     
     return jsonify({'token': token}), 200
+
+@auth_bp.route('/guest', methods=['POST'])
+def guest_login():
+    import uuid
+    # Create a unique guest username
+    guest_username = f"guest_{uuid.uuid4().hex[:8]}"
+    guest_password = uuid.uuid4().hex
+    
+    user = User(username=guest_username)
+    user.set_password(guest_password)
+    db.session.add(user)
+    db.session.commit()
+    
+    token = jwt.encode({
+        'user_id': user.id,
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1) # 1 day expiry for guests
+    }, current_app.config['SECRET_KEY'], algorithm="HS256")
+    
+    return jsonify({'token': token, 'username': guest_username}), 200
