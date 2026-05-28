@@ -86,10 +86,11 @@
 
     <!-- Add Transaction Modal -->
     <div class="modal-overlay" id="add-modal">
+        <!-- ... existing modal ... -->
         <div class="modal glass-panel">
             <div class="modal-header">
                 <h2>New Transaction</h2>
-                <button class="close-btn" onclick="closeModal()">&times;</button>
+                <button class="close-btn" onclick="closeModal('add-modal')">&times;</button>
             </div>
             <form id="transaction-form">
                 <div class="form-group">
@@ -130,6 +131,29 @@
                     <input type="text" id="notes" name="notes" placeholder="What was this for?">
                 </div>
                 <button type="submit" class="btn-primary w-full">Save Transaction</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal-overlay active" id="auth-modal">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h2 id="auth-title">Welcome to TrackFin</h2>
+            </div>
+            <form id="auth-form">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required placeholder="Enter your username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Enter your password" style="width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--panel-border); background: rgba(0,0,0,0.02); color: var(--text-main); font-family: inherit; outline: none; transition: var(--transition);">
+                </div>
+                <button type="submit" class="btn-primary w-full" id="auth-submit-btn">Login</button>
+                <p style="text-align: center; margin-top: 16px; color: var(--text-muted); font-size: 0.9rem;">
+                    Don't have an account? <a href="#" id="toggle-auth-mode" style="color: var(--primary);">Sign up</a>
+                </p>
             </form>
         </div>
     </div>
