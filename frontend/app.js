@@ -6,6 +6,7 @@ let isLoginMode = true;
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('date').valueAsDate = new Date();
     document.getElementById('transaction-form').addEventListener('submit', handleAddTransaction);
+    document.getElementById('goal-form').addEventListener('submit', handleAddGoal);
     document.getElementById('auth-form').addEventListener('submit', handleAuthSubmit);
     document.getElementById('toggle-auth-mode').addEventListener('click', toggleAuthMode);
     
@@ -106,28 +107,43 @@ function closeModal(id) {
 // Data Fetching
 async function fetchDashboardData() {
     try {
-        const [summaryRes, txRes] = await Promise.all([
+        const [summaryRes, txRes, healthRes, subsRes, goalsRes] = await Promise.all([
             fetchWithAuth(`${API_URL}/summary`),
-            fetchWithAuth(`${API_URL}/transactions`)
+            fetchWithAuth(`${API_URL}/transactions`),
+            fetchWithAuth(`${API_URL}/analytics/health`),
+            fetchWithAuth(`${API_URL}/analytics/subscriptions`),
+            fetchWithAuth(`${API_URL}/goals`)
         ]);
         
         const summary = await summaryRes.json();
         const transactions = await txRes.json();
+        const health = await healthRes.json();
+        const subs = await subsRes.json();
+        const goals = await goalsRes.json();
         
-        updateSummaryCards(summary);
+        updateSummaryCards(summary, health, subs);
         updateChart(summary.expensesByCategory);
         updateTransactionList(transactions);
+        updateGoalsList(goals);
     } catch (error) {
         console.error("Error fetching data:", error);
     }
 }
 
 // UI Updates
-function updateSummaryCards(summary) {
+function updateSummaryCards(summary, health, subs) {
     const formatMoney = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
     document.getElementById('net-amount').innerText = formatMoney(summary.net);
     document.getElementById('income-amount').innerText = '+' + formatMoney(summary.income);
     document.getElementById('expense-amount').innerText = '-' + formatMoney(summary.expenses);
+    
+    // Health Score
+    document.getElementById('health-score').innerText = health.score || '--';
+    document.getElementById('health-status').innerText = health.status || 'Analyzing...';
+    
+    // Burn Rate
+    document.getElementById('burn-amount').innerText = formatMoney(subs.monthly_burn || 0);
+    document.getElementById('subs-count').innerText = `${subs.active_subscriptions ? subs.active_subscriptions.length : 0} Subscriptions`;
 }
 
 function getCategoryIcon(category) {
@@ -168,6 +184,36 @@ function updateTransactionList(transactions) {
             <div class="tx-amount ${amountColorClass}">
                 ${amountSign}$${tx.amount.toFixed(2)}
             </div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function updateGoalsList(goals) {
+    const list = document.getElementById('goals-list');
+    list.innerHTML = '';
+    
+    if (goals.length === 0) {
+        list.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--text-muted)">No active savings goals.</div>';
+        return;
+    }
+    
+    goals.forEach(goal => {
+        const percentage = Math.min((goal.current_amount / goal.target_amount) * 100, 100).toFixed(1);
+        const formatMoney = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+        
+        const item = document.createElement('div');
+        item.className = 'goal-item';
+        item.style.marginBottom = '15px';
+        item.innerHTML = `
+            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                <strong>${goal.name}</strong>
+                <span>${formatMoney(goal.current_amount)} / ${formatMoney(goal.target_amount)}</span>
+            </div>
+            <div style="width: 100%; background-color: rgba(255,255,255,0.1); border-radius: 10px; height: 10px; overflow: hidden;">
+                <div style="width: ${percentage}%; background: var(--primary); height: 100%; border-radius: 10px; transition: width 0.5s ease;"></div>
+            </div>
+            <div style="text-align: right; font-size: 0.8rem; color: var(--text-muted); margin-top: 5px;">${percentage}% Complete</div>
         `;
         list.appendChild(item);
     });
@@ -233,6 +279,29 @@ async function handleAddTransaction(e) {
             fetchDashboardData();
         } else {
             alert("Error saving transaction.");
+        }
+    } catch (error) {
+        console.error("Error:", error);
+    }
+}
+
+async function handleAddGoal(e) {
+    e.preventDefault();
+    const name = document.getElementById('goal-name').value;
+    const target_amount = document.getElementById('goal-amount').value;
+    
+    try {
+        const response = await fetchWithAuth(`${API_URL}/goals`, {
+            method: 'POST',
+            body: JSON.stringify({ name, target_amount })
+        });
+        
+        if (response.ok) {
+            closeModal('add-goal-modal');
+            document.getElementById('goal-form').reset();
+            fetchDashboardData();
+        } else {
+            alert("Error saving goal.");
         }
     } catch (error) {
         console.error("Error:", error);

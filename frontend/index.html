@@ -57,16 +57,40 @@
                         <h3>Expenses</h3>
                         <div class="amount text-danger" id="expense-amount">-$0.00</div>
                     </div>
+                    <div class="card glass-panel">
+                        <h3>Financial Health</h3>
+                        <div class="amount text-primary" id="health-score">--</div>
+                        <p id="health-status" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">Analyzing...</p>
+                    </div>
+                    <div class="card glass-panel">
+                        <h3>Burn Rate (Subs)</h3>
+                        <div class="amount text-danger" id="burn-amount">$0.00</div>
+                        <p id="subs-count" style="color: var(--text-muted); font-size: 0.9rem; margin-top: 5px;">0 Subscriptions</p>
+                    </div>
                 </div>
 
                 <!-- Charts Area -->
-                <div class="charts-area">
-                    <div class="chart-card glass-panel">
-                        <h3>Expense Breakdown</h3>
-                        <div class="chart-container">
-                            <canvas id="expenseChart"></canvas>
-                        </div>
-                    </div>
+                <!-- Expense Chart -->
+            <div class="chart-container glass-panel">
+                <div class="panel-header">
+                    <h2>Spending by Category</h2>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="expenseChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Savings Goals -->
+            <div class="goals-container glass-panel">
+                <div class="panel-header">
+                    <h2>Savings Goals</h2>
+                    <button class="btn-primary btn-sm" onclick="openModal('add-goal-modal')">+ New Goal</button>
+                </div>
+                <div id="goals-list" class="goals-list">
+                    <!-- Goals will populate here -->
+                </div>
+            </div>
+        </div>
                 </div>
 
                 <!-- Recent Transactions -->
@@ -135,7 +159,29 @@
         </div>
     </div>
 
-    <!-- Auth Modal -->
+    <!-- Add Goal Modal -->
+    <div class="modal-overlay" id="add-goal-modal">
+        <div class="modal glass-panel">
+            <div class="modal-header">
+                <h2>New Savings Goal</h2>
+                <button class="close-btn" onclick="closeModal('add-goal-modal')">&times;</button>
+            </div>
+            <form id="goal-form">
+                <div class="form-group">
+                    <label for="goal-name">Goal Name</label>
+                    <input type="text" id="goal-name" name="goal-name" required placeholder="e.g. New Laptop">
+                </div>
+                <div class="form-group">
+                    <label for="goal-amount">Target Amount</label>
+                    <div class="input-prefix">
+                        <span>$</span>
+                        <input type="number" id="goal-amount" name="goal-amount" step="0.01" required placeholder="0.00">
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary w-full">Save Goal</button>
+            </form>
+        </div>
+    </div>
     <div class="modal-overlay active" id="auth-modal">
         <div class="modal glass-panel">
             <div class="modal-header">
