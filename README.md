@@ -1,78 +1,86 @@
 # TrackFin 🚀
 
-**TrackFin** is a premium, modern personal finance tracking application designed to give you complete control over your financial life. Built with a focus on intuitive user experience and stunning aesthetics, TrackFin makes managing your income, expenses, and savings goals both effortless and visually engaging.
+**TrackFin** is an intelligent, modern personal finance management and analytics platform built as a lightweight Fintech SaaS product. 
 
-Whether you're tracking daily coffee runs or managing a complex monthly budget, TrackFin provides the analytics and insights you need, wrapped in a beautiful, responsive interface that works flawlessly across desktop and mobile devices.
+It moves beyond standard expense tracking by offering smart heuristics, predictive analytics, and gamified savings goals, all wrapped in a premium glassmorphism UI.
+
+![TrackFin Demo](https://img.shields.io/badge/Status-Live-success?style=for-the-badge) ![Python](https://img.shields.io/badge/Python-Flask-blue?style=for-the-badge) ![JavaScript](https://img.shields.io/badge/Vanilla_JS-ES6-yellow?style=for-the-badge)
+
+## 🔗 Live Demo
+Check out the live application hosted on Vercel:
+**[https://track-fin-bay.vercel.app/](https://track-fin-bay.vercel.app/)**
+*(Tip: Click "Continue as Guest" to test it out without creating an account!)*
 
 ---
 
 ## ✨ Key Features
 
-* **Premium Glassmorphism UI**: A gorgeous whitish-grey theme with striking magenta accents, featuring smooth micro-animations and depth-enhancing glassmorphism effects.
-* **Smart Dashboard**: Instantly view your total balance, income, and expenses at a glance.
-* **Dynamic Analytics**: Interactive Chart.js visualizations that break down your spending habits by category.
-* **Seamless Transaction Logging**: Quickly add income or expenses with automatic categorization and date tracking.
-* **Fully Responsive**: Engineered with flexible CSS Grid and Flexbox to deliver a native-app feel on smartphones, tablets, and desktop monitors.
-* **Serverless Ready**: Configured for seamless deployment on Vercel, bridging a powerful Python backend with a lightning-fast static frontend.
+* **Smart Categorization Engine**: Let the app do the heavy lifting! Add an expense with a note like *"Uber home"* and the engine automatically tags it as **Transportation**.
+* **Financial Health Score**: An algorithm analyzes your savings ratio and discretionary spending to calculate a real-time health score (`Excellent`, `Good`, `Warning`, or `Critical`).
+* **Subscription & Burn Rate Tracking**: Automatically detects recurring subscriptions (e.g., Netflix, Rent, Gym) and aggregates them into a Monthly Burn Rate dashboard widget so you always know your fixed costs.
+* **Goal-Based Savings**: A gamified module where you can set targets (e.g., "New Laptop: $1500") and watch your progress bar fill up dynamically as you save.
+* **Frictionless Authentication**: Secure JWT-based authentication with a seamless "Guest" mode that auto-generates temporary, isolated accounts for immediate platform testing.
+* **Premium UI/UX**: Designed using pure CSS with dark-mode glassmorphism, fluid responsive layouts, and interactive Chart.js visualizations.
+* **AI-Ready Infrastructure**: Built-in mock endpoints (`/api/transactions/ocr` and `/api/transactions/voice`) designed to act as drop-in replacements for OpenAI Whisper and Google Cloud Vision SDKs.
 
 ---
 
-## 🛠️ Technology Stack
+## 🛠️ Tech Stack
 
-TrackFin is built using a modern, lightweight, and highly extensible stack:
+**Frontend:**
+* HTML5 / CSS3 (Custom Glassmorphism Design System)
+* Vanilla JavaScript (ES6+)
+* Chart.js (Data Visualization)
 
-| Layer | Technology | Description |
-| :--- | :--- | :--- |
-| **Frontend** | HTML5, Vanilla CSS, JavaScript | Pure, dependency-free frontend leveraging CSS variables, Flexbox, and Grid for maximum performance and customizability. |
-| **Visualizations**| Chart.js | Renders dynamic, responsive, and interactive charts. |
-| **Backend API** | Python, Flask | A robust RESTful API handling data validation, categorization, and aggregation. |
-| **Database** | SQLite & SQLAlchemy | Lightweight relational database managed via Python's leading ORM. |
-| **Deployment** | Vercel | Configured via `vercel.json` to serve the static frontend and run the Flask API as Serverless Functions. |
+**Backend:**
+* Python 3
+* Flask (Modular Blueprint Architecture)
+* SQLite (Routed to `/tmp` for Serverless compatibility)
+* SQLAlchemy (ORM)
+* PyJWT & Werkzeug Security (Authentication)
 
----
-
-## 🚀 Quick Start
-
-### 1. Local Development Setup
-Clone the repository and set up the backend:
-
-```bash
-git clone https://github.com/shekharsameer2308/TrackFin.git
-cd TrackFin
-
-# Set up the Python virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: .\venv\Scripts\activate
-
-# Install dependencies
-pip install -r backend/requirements.txt
-
-# Start the Flask API server
-python backend/app.py
-```
-The backend API will run on `http://localhost:5000`.
-
-### 2. Launch the Frontend
-Simply open `frontend/index.html` in any modern web browser. The app will automatically connect to your local Flask server.
+**Deployment:**
+* Vercel (Serverless Functions for Python Backend + Static Frontend Hosting)
 
 ---
 
-## 🌐 Production Deployment
+## 💻 Local Development
 
-TrackFin includes a `vercel.json` file, making it ready for immediate deployment on Vercel. 
-1. Import the repository into your Vercel account.
-2. Vercel will automatically serve the `/frontend` directory and map the `/api/*` routes to the Python Serverless Functions in `backend/app.py`.
+Want to run TrackFin locally? Follow these steps:
 
-*(Note: SQLite is used for local development. For persistent data in production on Vercel, update the `SQLALCHEMY_DATABASE_URI` in `config.py` to point to a cloud database like Vercel Postgres or Supabase).*
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/shekharsameer2308/TrackFin.git
+   cd TrackFin
+   ```
+
+2. **Set up the Python Virtual Environment:**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows use: .\venv\Scripts\Activate.ps1
+   ```
+
+3. **Install Dependencies:**
+   ```bash
+   pip install -r backend/requirements.txt
+   ```
+
+4. **Run the Backend Server:**
+   ```bash
+   python backend/app.py
+   ```
+
+5. **Start the Frontend:**
+   Open `frontend/index.html` in any modern web browser or use a live server extension!
 
 ---
 
-## 🎨 Design Philosophy
-TrackFin departs from bulky CSS frameworks. By utilizing **Vanilla CSS**, the project maintains a tiny footprint while achieving a highly customized, premium look. The design prioritizes:
-- **Clarity**: High-contrast typography and clear visual hierarchy.
-- **Feedback**: Subtle hover states and smooth transitions for a responsive feel.
-- **Adaptability**: Fluid layouts that gracefully restructure across screen sizes.
+## 🔮 Roadmap / Future Enhancements
+- [ ] Connect real OpenAI Whisper API to the voice-logging endpoint.
+- [ ] Connect Google Cloud Vision API to the receipt OCR endpoint.
+- [ ] Migrate from SQLite to a managed PostgreSQL database for permanent production storage.
+- [ ] Add CSV export functionality for financial reporting.
 
 ---
 
-Crafted with ❤️ to make personal finance tracking smarter and simpler.
+*Engineered as a Master Fintech SaaS implementation.*
