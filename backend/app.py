@@ -1,9 +1,29 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from flask import Flask, jsonify
 from flask_cors import CORS
-from models import db
-from config import Config
+try:
+    from models import db
+    from config import Config
+except ImportError as e:
+    # We will let the app run and return the error on the root
+    db = None
+    Config = None
+    import_error = str(e)
+else:
+    import_error = None
 
 def create_app():
+    if import_error:
+        error_app = Flask(__name__)
+        @error_app.route('/api/health', defaults={'path': ''})
+        @error_app.route('/<path:path>')
+        def handle_import_error(path):
+            return jsonify({"error": f"Import Error: {import_error}"}), 500
+        return error_app
+        
     try:
         app = Flask(__name__)
         app.config.from_object(Config)
@@ -32,7 +52,6 @@ def create_app():
 
         return app
     except Exception as e:
-        # Create a dummy app to return the error
         error_app = Flask(__name__)
         @error_app.route('/api/health', defaults={'path': ''})
         @error_app.route('/<path:path>')
