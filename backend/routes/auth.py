@@ -34,6 +34,7 @@ def login():
         
     token = jwt.encode({
         'user_id': user.id,
+        'username': user.username,
         'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)
     }, current_app.config['SECRET_KEY'], algorithm="HS256")
     
@@ -53,6 +54,7 @@ def guest_login():
     
     token = jwt.encode({
         'user_id': user.id,
+        'username': guest_username,
         'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1) # 1 day expiry for guests
     }, current_app.config['SECRET_KEY'], algorithm="HS256")
     

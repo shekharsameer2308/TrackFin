@@ -18,8 +18,16 @@ def token_required(f):
         try:
             data = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=["HS256"])
             current_user = User.query.get(data['user_id'])
+            
             if not current_user:
-                raise Exception("User not found")
+                # VERCEL STATELESS FIX: If the SQLite DB was wiped by a cold start,
+                # recreate the user seamlessly since their JWT is cryptographically valid!
+                from models import db
+                username = data.get('username', f'user_{data["user_id"]}')
+                current_user = User(id=data['user_id'], username=username)
+                db.session.add(current_user)
+                db.session.commit()
+                
         except Exception as e:
             return jsonify({'message': 'Token is invalid!', 'error': str(e)}), 401
             
