@@ -11,8 +11,35 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('toggle-auth-mode').addEventListener('click', toggleAuthMode);
     document.getElementById('guest-btn').addEventListener('click', handleGuestLogin);
     
+    // Tab switching setup
+    document.querySelectorAll('.nav-item[data-view]').forEach(item => {
+        item.addEventListener('click', handleTabSwitch);
+    });
+
+    // Chatbot setup
+    document.getElementById('chat-toggle').addEventListener('click', () => document.getElementById('chat-panel').classList.add('active'));
+    document.getElementById('chat-close').addEventListener('click', () => document.getElementById('chat-panel').classList.remove('active'));
+
     checkAuthStatus();
 });
+
+// View Switching Logic
+function handleTabSwitch(e) {
+    e.preventDefault();
+    const targetView = e.currentTarget.getAttribute('data-view');
+    if (!targetView) return;
+
+    // Update nav classes
+    document.querySelectorAll('.nav-item[data-view]').forEach(nav => nav.classList.remove('active'));
+    e.currentTarget.classList.add('active');
+
+    // Update view classes
+    document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+    const targetElement = document.getElementById(`view-${targetView}`);
+    if (targetElement) {
+        targetElement.classList.add('active');
+    }
+}
 
 // Auth Logic
 function toggleAuthMode(e) {
@@ -328,4 +355,51 @@ async function handleAddGoal(e) {
     } catch (error) {
         console.error("Error:", error);
     }
+}
+
+// Chatbot Logic
+async function sendChatMessage() {
+    const inputField = document.getElementById('chat-input');
+    const message = inputField.value.trim();
+    if (!message) return;
+
+    inputField.value = '';
+    appendChatMessage(message, 'user');
+
+    // Add typing indicator
+    const typingId = 'typing-' + Date.now();
+    appendChatMessage('...', 'ai', typingId);
+
+    try {
+        const response = await fetchWithAuth(`${API_URL}/chat`, {
+            method: 'POST',
+            body: JSON.stringify({ message })
+        });
+        const data = await response.json();
+        
+        // Remove typing indicator
+        const typingEl = document.getElementById(typingId);
+        if(typingEl) typingEl.remove();
+
+        if (response.ok) {
+            appendChatMessage(data.reply, 'ai');
+        } else {
+            appendChatMessage("Sorry, I'm having trouble connecting to the network right now.", 'ai');
+        }
+    } catch (error) {
+        const typingEl = document.getElementById(typingId);
+        if(typingEl) typingEl.remove();
+        appendChatMessage("Network error occurred.", 'ai');
+    }
+}
+
+function appendChatMessage(text, sender, id = null) {
+    const chatBody = document.getElementById('chat-body');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `chat-msg ${sender}`;
+    msgDiv.innerText = text;
+    if (id) msgDiv.id = id;
+    
+    chatBody.appendChild(msgDiv);
+    chatBody.scrollTop = chatBody.scrollHeight;
 }

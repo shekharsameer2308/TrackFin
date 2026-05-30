@@ -44,11 +44,13 @@ def create_app():
         from routes.transactions import transactions_bp
         from routes.goals import goals_bp
         from routes.analytics import analytics_bp
+        from routes.chat import chat_bp
         
         app.register_blueprint(auth_bp, url_prefix='/api/auth')
         app.register_blueprint(transactions_bp, url_prefix='/api')
         app.register_blueprint(goals_bp, url_prefix='/api/goals')
         app.register_blueprint(analytics_bp, url_prefix='/api/analytics')
+        app.register_blueprint(chat_bp, url_prefix='/api')
 
         return app
     except Exception as e:
