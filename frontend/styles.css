@@ -236,6 +236,12 @@ nav {
 
 .card {
     padding: 24px;
+    transition: var(--transition);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .card h3 {
