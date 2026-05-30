@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://img.shields.io/badge/TrackFin-black?style=for-the-badge&logo=appveyor" alt="TrackFin Logo" />
+  <img src="https://img.shields.io/badge/TrackFin-black?style=for-the-badge" alt="TrackFin Logo" />
   <h1>TrackFin Intelligence Platform</h1>
   <p><strong>A Modern, AI-Ready Personal Finance & Behavioral Analytics SaaS</strong></p>
 
