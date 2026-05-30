@@ -19,7 +19,7 @@
 
 **TrackFin** is not just an expense tracker—it is a proactive behavioral finance engine. Built with modern web engineering principles, TrackFin transforms raw transaction data into intelligent financial recommendations, dynamic analytics, and gamified savings goals. 
 
-The platform is designed with a premium, responsive **glassmorphism** UI and an architecture that supports seamless scaling.
+The platform features a premium, responsive **minimalist SaaS flat-design** UI and an architecture that supports seamless scaling.
 
 ## 🚀 Live Application
 
@@ -35,13 +35,18 @@ Experience the platform immediately without creating an account:
 * **Auto-Tagging Engine:** Employs keyword heuristics to automatically categorize unstructured transaction data (e.g., "Uber" → *Transportation*).
 * **Subscription Detection:** Automatically flags recurring payments and calculates your 30-day fixed "Burn Rate."
 
-### 📈 Behavioral Analytics
+### 🤖 AI Financial Advisor (Chatbot)
+* **Context-Aware Insights:** An integrated AI chat widget that reads your real-time transaction data to answer questions about your spending habits.
+* **Intelligent Recommendations:** Provides proactive advice on budget utilization and saving trajectories.
+
+### 📈 Behavioral Analytics & Budgeting
+* **Cashflow Trends:** Massive, interactive Chart.js graphs mapping 30-day income vs. expense cashflow.
+* **Strict Budgeting:** Set monthly spend limits and watch a dynamic utilization bar warn you as you approach your cutoff.
 * **Algorithmic Health Score:** Dynamically calculates a financial health index (0–100) based on savings ratios, discretionary spending, and fixed costs.
-* **Predictive Forecasting:** Estimates your end-of-month financial trajectory using moving averages.
 
 ### 🎯 Gamified Goal Management
 * **Dynamic Savings Goals:** Create custom goals (e.g., "Emergency Fund", "New Laptop").
-* **Visual Progress:** Interactive UI components that fill up in real-time as you log positive cash flow.
+* **Trajectory Forecasting:** The dashboard automatically calculates your required monthly savings rate to hit your annual targets.
 
 ### 🔐 Frictionless & Secure Architecture
 * **JWT-Based Authentication:** Stateless, scalable session management.
@@ -74,7 +79,7 @@ graph TD
 
 ### Frontend Engineering
 * **Languages:** HTML5, CSS3 (Vanilla), JavaScript (ES6+)
-* **Design System:** Custom CSS tokens, Flexbox/Grid, Dark-mode Glassmorphism
+* **Design System:** Custom CSS tokens, Flexbox/Grid, Dark/Light Mode Minimalist SaaS UI
 * **Data Visualization:** Chart.js
 
 ### Backend Engineering
