@@ -1,9 +1,20 @@
 const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:5000/api' : '/api';
 let expenseChartInstance = null;
+let cashflowChartInstance = null;
 let isLoginMode = true;
+
+// Settings State
+let userSettings = {
+    currency: localStorage.getItem('currency') || 'USD',
+    budget: parseFloat(localStorage.getItem('budget')) || 0,
+    annualGoal: parseFloat(localStorage.getItem('annualGoal')) || 0
+};
 
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    loadSettingsUI();
+
     document.getElementById('date').valueAsDate = new Date();
     document.getElementById('transaction-form').addEventListener('submit', handleAddTransaction);
     document.getElementById('goal-form').addEventListener('submit', handleAddGoal);
@@ -16,12 +27,67 @@ document.addEventListener('DOMContentLoaded', () => {
         item.addEventListener('click', handleTabSwitch);
     });
 
+    // Theme toggle
+    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
     // Chatbot setup
     document.getElementById('chat-toggle').addEventListener('click', () => document.getElementById('chat-panel').classList.add('active'));
     document.getElementById('chat-close').addEventListener('click', () => document.getElementById('chat-panel').classList.remove('active'));
 
     checkAuthStatus();
 });
+
+// Theme Logic
+function initTheme() {
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.setAttribute('data-theme', 'dark');
+    }
+}
+
+function toggleTheme(e) {
+    e.preventDefault();
+    if (document.body.getAttribute('data-theme') === 'dark') {
+        document.body.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'light');
+    } else {
+        document.body.setAttribute('data-theme', 'dark');
+        localStorage.setItem('theme', 'dark');
+    }
+    // Re-render charts for theme colors
+    fetchDashboardData();
+}
+
+// Settings Logic
+function loadSettingsUI() {
+    document.getElementById('setting-currency').value = userSettings.currency;
+    if (userSettings.budget) document.getElementById('setting-budget').value = userSettings.budget;
+    if (userSettings.annualGoal) document.getElementById('setting-annual-goal').value = userSettings.annualGoal;
+}
+
+function saveSettings(e) {
+    e.preventDefault();
+    userSettings.currency = document.getElementById('setting-currency').value;
+    userSettings.budget = parseFloat(document.getElementById('setting-budget').value) || 0;
+    userSettings.annualGoal = parseFloat(document.getElementById('setting-annual-goal').value) || 0;
+
+    localStorage.setItem('currency', userSettings.currency);
+    localStorage.setItem('budget', userSettings.budget);
+    localStorage.setItem('annualGoal', userSettings.annualGoal);
+
+    alert("Settings saved successfully!");
+    fetchDashboardData();
+}
+
+// Global Currency Formatter
+function formatMoney(amount) {
+    const locales = {
+        'USD': 'en-US', 'EUR': 'de-DE', 'GBP': 'en-GB', 'INR': 'en-IN'
+    };
+    return new Intl.NumberFormat(locales[userSettings.currency] || 'en-US', { 
+        style: 'currency', 
+        currency: userSettings.currency 
+    }).format(amount);
+}
 
 // View Switching Logic
 function handleTabSwitch(e) {
@@ -174,14 +240,30 @@ async function fetchDashboardData() {
         updateChart(summary.expensesByCategory);
         updateTransactionList(transactions);
         updateGoalsList(goals);
+        
+        // New Intelligent UI Updates
+        updateBudgetUI(summary.expenses);
+        updateSavingsTrajectory(goals, summary.net);
+        
+        // Assuming we build this endpoint next
+        fetchAnalyticsData();
     } catch (error) {
         console.error("Error fetching data:", error);
     }
 }
 
+async function fetchAnalyticsData() {
+    try {
+        const res = await fetchWithAuth(`${API_URL}/analytics/cashflow`);
+        if(res.ok) {
+            const data = await res.json();
+            updateCashflowChart(data);
+        }
+    } catch (e) { console.error("Cashflow data error", e); }
+}
+
 // UI Updates
 function updateSummaryCards(summary, health, subs) {
-    const formatMoney = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
     document.getElementById('net-amount').innerText = formatMoney(summary.net);
     document.getElementById('income-amount').innerText = '+' + formatMoney(summary.income);
     document.getElementById('expense-amount').innerText = '-' + formatMoney(summary.expenses);
@@ -231,11 +313,55 @@ function updateTransactionList(transactions) {
                 </div>
             </div>
             <div class="tx-amount ${amountColorClass}">
-                ${amountSign}$${tx.amount.toFixed(2)}
+                ${amountSign}${formatMoney(tx.amount).replace(/^[^\d]+/, '')} 
+                <!-- Strips duplicate symbol if the locale places it at the front, but keep formatMoney for safety -->
             </div>
         `;
         list.appendChild(item);
     });
+}
+
+function updateBudgetUI(currentExpenses) {
+    const bar = document.getElementById('budget-fill');
+    const text = document.getElementById('budget-text');
+    
+    if (!userSettings.budget || userSettings.budget <= 0) {
+        bar.style.width = '0%';
+        text.innerText = `${formatMoney(currentExpenses)} / Limit Not Set`;
+        return;
+    }
+    
+    const percentage = Math.min((currentExpenses / userSettings.budget) * 100, 100);
+    bar.style.width = percentage + '%';
+    text.innerText = `${formatMoney(currentExpenses)} / ${formatMoney(userSettings.budget)}`;
+    
+    if (percentage > 90) bar.style.backgroundColor = 'var(--danger)';
+    else if (percentage > 75) bar.style.backgroundColor = 'var(--warning)';
+    else bar.style.backgroundColor = 'var(--success)';
+}
+
+function updateSavingsTrajectory(goals, netWorth) {
+    const amountEl = document.getElementById('savings-req-amount');
+    const textEl = document.getElementById('savings-req-text');
+    
+    if (!userSettings.annualGoal || userSettings.annualGoal <= 0) {
+        amountEl.innerText = '--';
+        textEl.innerText = "Set an Annual Goal in Settings.";
+        return;
+    }
+    
+    const now = new Date();
+    const monthsLeft = 12 - now.getMonth(); 
+    
+    // Total saved across goals + liquid net worth (simple heuristic)
+    const totalSaved = goals.reduce((acc, g) => acc + g.current_amount, 0);
+    const progress = totalSaved + Math.max(netWorth, 0);
+    
+    const remaining = Math.max(userSettings.annualGoal - progress, 0);
+    const requiredPerMonth = remaining / monthsLeft;
+    
+    amountEl.innerText = formatMoney(requiredPerMonth);
+    textEl.innerText = `/mo required to hit ${formatMoney(userSettings.annualGoal)} by year end.`;
 }
 
 function updateGoalsList(goals) {
@@ -249,7 +375,6 @@ function updateGoalsList(goals) {
     
     goals.forEach(goal => {
         const percentage = Math.min((goal.current_amount / goal.target_amount) * 100, 100).toFixed(1);
-        const formatMoney = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
         
         const item = document.createElement('div');
         item.className = 'goal-item';
@@ -301,6 +426,54 @@ function updateChart(categories) {
                 tooltip: { backgroundColor: 'rgba(255, 255, 255, 0.9)', titleColor: '#1f2937', bodyColor: '#1f2937', titleFont: { family: 'Outfit' }, bodyFont: { family: 'Outfit' }, padding: 12, cornerRadius: 8, borderColor: 'rgba(0,0,0,0.1)', borderWidth: 1 }
             },
             cutout: '70%'
+        }
+    });
+}
+
+function updateCashflowChart(cashflowData) {
+    const ctx = document.getElementById('cashflowChart');
+    if(!ctx) return;
+    
+    if (cashflowChartInstance) {
+        cashflowChartInstance.destroy();
+    }
+    
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    const textColor = isDark ? '#a3a3a3' : '#6b7280';
+    const gridColor = isDark ? '#262626' : '#e5e7eb';
+    
+    cashflowChartInstance = new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: cashflowData.labels,
+            datasets: [
+                {
+                    label: 'Income',
+                    data: cashflowData.income,
+                    borderColor: '#10b981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Expenses',
+                    data: cashflowData.expenses,
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: {
+                y: { grid: { color: gridColor }, ticks: { color: textColor } },
+                x: { grid: { color: gridColor }, ticks: { color: textColor } }
+            },
+            plugins: {
+                legend: { labels: { color: textColor, font: { family: 'Outfit' } } }
+            }
         }
     });
 }

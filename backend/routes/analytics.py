@@ -84,3 +84,38 @@ def predict_balance(current_user):
         "daily_burn_rate": round(daily_burn_rate, 2),
         "predicted_30d_expense": round(daily_burn_rate * 30, 2)
     }), 200
+
+@analytics_bp.route('/cashflow', methods=['GET'])
+@token_required
+def get_cashflow(current_user):
+    today = datetime.date.today()
+    thirty_days_ago = today - datetime.timedelta(days=30)
+    
+    transactions = Transaction.query.filter(
+        Transaction.user_id == current_user.id,
+        Transaction.date >= thirty_days_ago.isoformat()
+    ).order_by(Transaction.date).all()
+    
+    # We want an array of the last 30 days
+    date_labels = [(thirty_days_ago + datetime.timedelta(days=i)).isoformat() for i in range(31)]
+    income_map = defaultdict(float)
+    expense_map = defaultdict(float)
+    
+    for tx in transactions:
+        # tx.date is a string 'YYYY-MM-DD'
+        if tx.type == 'income':
+            income_map[tx.date[:10]] += tx.amount
+        else:
+            expense_map[tx.date[:10]] += tx.amount
+            
+    income_data = [income_map.get(d, 0.0) for d in date_labels]
+    expense_data = [expense_map.get(d, 0.0) for d in date_labels]
+    
+    # Format labels for frontend
+    formatted_labels = [datetime.date.fromisoformat(d).strftime('%b %d') for d in date_labels]
+    
+    return jsonify({
+        "labels": formatted_labels,
+        "income": income_data,
+        "expenses": expense_data
+    }), 200
